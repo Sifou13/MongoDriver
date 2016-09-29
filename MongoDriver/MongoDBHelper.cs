@@ -18,13 +18,13 @@ namespace MongoDriver
             _mongoClient = new MongoClient("mongodb://localhost:27017");
         }
 
-        public void Insert<T>(string dbName, string collectionName, T item)
+        public List<T> Find<T>(string dbName, string collectionName)
         {
             IMongoDatabase mongodb = GetDatabase(dbName);
-            mongodb
-                .GetCollection<T>(collectionName, new MongoCollectionSettings { AssignIdOnInsert = true, GuidRepresentation = GuidRepresentation.CSharpLegacy })
-                .InsertOneAsync(item)
-                .Wait();            
+
+            return mongodb
+                .GetCollection<T>(collectionName)
+                .Find<T>(null).ToList();            
         }
 
         public void Insert<T>(string dbName, string collectionName, T[] items)
@@ -34,6 +34,17 @@ namespace MongoDriver
             mongodb
                 .GetCollection<T>(collectionName)
                 .InsertManyAsync(items)
+                .Wait();
+        }
+
+        public void UpdateOne<T>(string dbName, string collectionName,  documentName, T documentMatchCriteria )
+        {
+            IMongoDatabase mongodb = GetDatabase(dbName);
+
+            FilterDefinition<T> filter =  new FilterDefinitionBuilder<T>().Eq(documentName, documentMatchCriteria)
+            mongodb
+                .GetCollection<T>(collectionName)
+                .UpdateOneAsync(item)
                 .Wait();
         }
 
